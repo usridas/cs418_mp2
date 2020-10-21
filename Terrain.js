@@ -33,8 +33,11 @@ class Terrain{
         this.generateTriangles();
         console.log("Terrain: Generated triangles");
 
-        //this.setNormals();
-        //console.log("Terrain: Set new normals")
+        this.setHeight();
+        console.log("Terrain: Set new heights")
+
+        this.setNormals();
+        console.log("Terrain: Set new normals")
 
         this.generateLines();
         console.log("Terrain: Generated lines");
@@ -196,14 +199,10 @@ generateTriangles()
     }
     this.numVertices = this.vBuffer.length/3;
     this.numFaces = this.fBuffer.length/3;
-
-    this.setHeight();
-    //this.updateVertices();
-    this.setNormals();
 }
 
 /**
-* Set random heights via random partition (100 iterations)
+* Set random heights via random partition (100 iterations with 0.005 height change)
 */
 setHeight()
 {
@@ -221,8 +220,8 @@ setHeight()
       p[1] = Math.floor(Math.random() * this.maxY) + this.minY; //random y between min and max
       b = [this.vBuffer[3*i], this.vBuffer[(3*i) + 1]];
       glMatrix.vec3.sub(subvec, b, p);
-      norm[0] = Math.floor(Math.random() * this.maxX) + this.minX; //random x norm
-      norm[1] = Math.floor(Math.random() * this.maxY) + this.minY; //random y norm
+      norm[0] = Math.floor(Math.random() * this.maxX) + this.minX; //random x norm between min and max
+      norm[1] = Math.floor(Math.random() * this.maxY) + this.minY; //random y norm between min and max
       //if (glMatrix.vec3.dot(subvec, norm) > 0) //(b−p)⋅n>0
       if (Math.random() > 0.5)
       {
@@ -236,6 +235,9 @@ setHeight()
   }
 }
 
+/**
+ * Find normal vectors for faces and set up new normals
+ */
 setNormals()
 {
   var i = 0;
@@ -273,37 +275,6 @@ setNormals()
     this.nBuffer[(3*i) + 2] = newnorm[2]; //Set new values for normalized normal
   }
 }
-
-
-//HALP ME
-/**
- * Generate the plane by randomly devide the vertices
- */
- // updateVertices()
- // {
- //   // Number of iterations
- //   var it = 100;
- //   // Adjustment of each iteration
- //   var delta = 0.005;
- //
- //   for (var i = 0; i < it; i++) {
- //     var p = [Math.random() * (this.maxX - this.minX) + this.minX, Math.random() * (this.maxY - this.minY) + this.minY];
- //     var n = glMatrix.vec2.create();
- //     glMatrix.vec2.random(n);
- //     for (var j = 0; j < this.numVertices; j++) {
- //       var b = [this.vBuffer[j * 3], this.vBuffer[j * 3 + 1]];
- //       if ((b[0] - p[0]) * n[0] + (b[1] - p[1]) * n[1] > 0) {
- //         this.vBuffer[(3*j) + 2] = this.vBuffer[(3*j) + 2] + 0.005;
- //         //this.vBuffer[j * 3 + 2] += 0.005;
- //       } else {
- //         this.vBuffer[(3*j) + 2] = this.vBuffer[(3*j) + 2] - 0.005;
- //         //this.vBuffer[j * 3 + 2] -= 0.005;
- //       }
- //     }
- //   }
- // }
-//PLEASE HALP ME
-
 
 /**
  * Print vertices and triangles to console for debugging
