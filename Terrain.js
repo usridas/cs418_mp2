@@ -33,6 +33,9 @@ class Terrain{
         this.generateTriangles();
         console.log("Terrain: Generated triangles");
 
+        //this.setNormals();
+        //console.log("Terrain: Set new normals")
+
         this.generateLines();
         console.log("Terrain: Generated lines");
 
@@ -175,8 +178,6 @@ generateTriangles()
         this.nBuffer.push(1); //z normal default
       }
     }
-    //this.updateVertices();
-    this.setHeight();
     i = 0; //reset i
     j = 0; //reset j
     for (j = 0; j < this.div; j++)
@@ -195,6 +196,9 @@ generateTriangles()
     }
     this.numVertices = this.vBuffer.length/3;
     this.numFaces = this.fBuffer.length/3;
+
+    this.setHeight();
+    //this.updateVertices();
     this.setNormals();
 }
 
@@ -205,29 +209,28 @@ setHeight()
 {
   var i = 0;
   var j = 0;
-  var x = 0;
   var p = glMatrix.vec3.create();
   var b = glMatrix.vec3.create();
   var norm = glMatrix.vec3.create();
   var subvec = glMatrix.vec3.create();
-  var rad = 0;
-  for{x = 0; x <= 10; x++} //Try 10 iterations
+  for(j = 0; j <= 100; j++) //Try 100 iterations
   {
     for(i = 0; i < this.numVertices; i++)
     {
       p[0] = Math.floor(Math.random() * this.maxX) + this.minX; //random x between min and max
       p[1] = Math.floor(Math.random() * this.maxY) + this.minY; //random y between min and max
+      b = [this.vBuffer[3*i], this.vBuffer[(3*i) + 1]];
+      glMatrix.vec3.sub(subvec, b, p);
       norm[0] = Math.floor(Math.random() * this.maxX) + this.minX; //random x norm
       norm[1] = Math.floor(Math.random() * this.maxY) + this.minY; //random y norm
-      b = [this.vBuffer[3*i], this.vBuffer[(3*i) + 1], this.vBuffer[(3*i) + 2]];
-      glMatrix.vec3.sub(subvec, b, p);
-      if (glMatrix.vec3.dot(subvec, norm) > 0) //(b−p)⋅n>0
+      //if (glMatrix.vec3.dot(subvec, norm) > 0) //(b−p)⋅n>0
+      if (Math.random() > 0.5)
       {
-        this.vBuffer[(3*i) + 2] = this.vBuffer[(3*i) + 2] + 0.5; //Increment height by 0.5
+        this.vBuffer[(3*i) + 2] = this.vBuffer[(3*i) + 2] + 0.005; //Increment height by 0.005
       }
       else
       {
-       this.vBuffer[(3*i) + 2] = this.vBuffer[(3*i) + 2] - 0.5; //Decrement height by 0.5
+        this.vBuffer[(3*i) + 2] = this.vBuffer[(3*i) + 2] - 0.005; //Decrement height by 0.005
       }
     }
   }
@@ -258,17 +261,13 @@ setNormals()
     glMatrix.vec3.add(nor1, nor1, nor); //Add new and old normals
     glMatrix.vec3.add(nor2, nor2, nor); //Add new and old normals
     glMatrix.vec3.add(nor3, nor3, nor); //Add new and old normals
-
-    [this.nBuffer[3 * this.fBuffer[3*i]], this.nBuffer[(3 * this.fBuffer[3*i]) + 1], this.nBuffer[(3 * this.fBuffer[3*i]) + 2]] = nor1; //Set first normal of face
-    [this.nBuffer[3 * this.fBuffer[(3*i) + 1]], this.nBuffer[(3 * this.fBuffer[(3*i) + 1]) + 1], this.nBuffer[(3 * this.fBuffer[(3*i) + 1]) + 2]] = nor2; //Set second normal of face
-    [this.nBuffer[3 * this.fBuffer[(3*i) + 2]], this.nBuffer[(3 * this.fBuffer[(3*i) + 2]) + 1], this.nBuffer[(3 * this.fBuffer[(3*i) + 2]) + 2]] = nor3; //Set third normal of face
   }
 
   i = 0; //reset i
   for (i = 0; i < this.numVertices; i++)
   {
     var newnorm = [this.nBuffer[3*i], this.nBuffer[(3*i) + 1], this.nBuffer[(3*i) + 2]];
-    glMatrix.vec3.normalize(newnorm, newnorm);
+    glMatrix.vec3.normalize(newnorm, newnorm); //Unit length
     this.nBuffer[3*i] = newnorm[0]; //Set new values for normalized normal
     this.nBuffer[(3*i) + 1] = newnorm[1]; //Set new values for normalized normal
     this.nBuffer[(3*i) + 2] = newnorm[2]; //Set new values for normalized normal
@@ -283,9 +282,9 @@ setNormals()
  // updateVertices()
  // {
  //   // Number of iterations
- //   var it = 200;
+ //   var it = 100;
  //   // Adjustment of each iteration
- //   var delta = 0.0035;
+ //   var delta = 0.005;
  //
  //   for (var i = 0; i < it; i++) {
  //     var p = [Math.random() * (this.maxX - this.minX) + this.minX, Math.random() * (this.maxY - this.minY) + this.minY];
@@ -294,9 +293,11 @@ setNormals()
  //     for (var j = 0; j < this.numVertices; j++) {
  //       var b = [this.vBuffer[j * 3], this.vBuffer[j * 3 + 1]];
  //       if ((b[0] - p[0]) * n[0] + (b[1] - p[1]) * n[1] > 0) {
- //         this.vBuffer[j * 3 + 2] += delta;
+ //         this.vBuffer[(3*j) + 2] = this.vBuffer[(3*j) + 2] + 0.005;
+ //         //this.vBuffer[j * 3 + 2] += 0.005;
  //       } else {
- //         this.vBuffer[j * 3 + 2] -= delta;
+ //         this.vBuffer[(3*j) + 2] = this.vBuffer[(3*j) + 2] - 0.005;
+ //         //this.vBuffer[j * 3 + 2] -= 0.005;
  //       }
  //     }
  //   }
